@@ -1,0 +1,9 @@
+main.cpp
+    - Choose roles
+    - initialize objects
+user.h
+    Use Class
+admin.h
+    Admin Class
+database.h
+    DatabaseHandler Class
