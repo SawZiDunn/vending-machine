@@ -7,6 +7,7 @@
 
 using namespace std;
 
+// represents each item
 struct Item
 {
     int item_id;
@@ -169,6 +170,32 @@ public:
         sqlite3_finalize(stmt);
     }
 
+    // get quantity for a single denomination
+    int getQuantity(int denomination, const string &table_name)
+    {
+        string query = "SELECT quantity FROM " + table_name + " WHERE denomination = " + to_string(denomination) + ";";
+
+        sqlite3_stmt *stmt;
+        int rc = sqlite3_prepare_v2(db, query.c_str(), -1, &stmt, nullptr);
+
+        if (rc != SQLITE_OK)
+        {
+            cerr << "Failed to fetch data: " << sqlite3_errmsg(db) << endl;
+            return 0;
+        }
+
+        int quantity;
+        while (sqlite3_step(stmt) == SQLITE_ROW)
+        {
+            int q = sqlite3_column_int(stmt, 1); // Get the 'quantity' column value
+            quantity = q;
+        }
+
+        sqlite3_finalize(stmt);
+        return quantity;
+    }
+
+    // decrease item quantity by 1
     void decrease_item_quantity(const string &item_id)
     {
         string query = "SELECT quantity FROM stocks_67011653 WHERE item_id = " + item_id + ";";
@@ -199,6 +226,42 @@ public:
         int newQuantity = currentQuantity - 1;
 
         string updateQuery = "UPDATE stocks_67011653 SET quantity = " + to_string(newQuantity) + " WHERE item_id = " + item_id + ";";
+
+        char *errorMessage = nullptr;
+        rc = sqlite3_exec(db, updateQuery.c_str(), nullptr, nullptr, &errorMessage);
+
+        if (rc != SQLITE_OK)
+        {
+            cerr << "SQL error: " << errorMessage << endl;
+            sqlite3_free(errorMessage);
+        }
+
+        sqlite3_finalize(stmt);
+    }
+
+    // insert a single denomination (100, 20, etc) to collection_box
+    void insert_money(int denomination, int quantity)
+    {
+        string query = "SELECT quantity FROM collection_box WHERE denomination = " + to_string(denomination) + ";";
+
+        sqlite3_stmt *stmt;
+        int rc = sqlite3_prepare_v2(db, query.c_str(), -1, &stmt, nullptr);
+
+        if (rc != SQLITE_OK)
+        {
+            cerr << "Failed to fetch data: " << sqlite3_errmsg(db) << endl;
+            return;
+        }
+
+        int currentQuantity = 0;
+        if (sqlite3_step(stmt) == SQLITE_ROW)
+        {
+            currentQuantity = sqlite3_column_int(stmt, 0);
+        }
+
+        int newQuantity = currentQuantity + quantity;
+
+        string updateQuery = "UPDATE collection_box SET quantity = " + to_string(newQuantity) + " WHERE denomination = " + to_string(denomination) + ";";
 
         char *errorMessage = nullptr;
         rc = sqlite3_exec(db, updateQuery.c_str(), nullptr, nullptr, &errorMessage);
@@ -248,6 +311,7 @@ public:
         }
     }
 
+    // get total money from money_box
     int check_money_box(const string &table_name)
     {
         string query = "SELECT denomination, quantity FROM " + table_name + ";";
@@ -276,17 +340,17 @@ public:
 private:
     sqlite3 *db = nullptr;
 
-    bool executeSQL(const string &query)
-    {
-        char *errorMessage = nullptr;
+    // bool executeSQL(const string &query)
+    // {
+    //     char *errorMessage = nullptr;
 
-        int rc = sqlite3_exec(db, query.c_str(), nullptr, nullptr, &errorMessage);
-        if (rc != SQLITE_OK)
-        {
-            cerr << "SQL error: " << errorMessage << endl;
-            sqlite3_free(errorMessage);
-            return false;
-        }
-        return true;
-    }
+    //     int rc = sqlite3_exec(db, query.c_str(), nullptr, nullptr, &errorMessage);
+    //     if (rc != SQLITE_OK)
+    //     {
+    //         cerr << "SQL error: " << errorMessage << endl;
+    //         sqlite3_free(errorMessage);
+    //         return false;
+    //     }
+    //     return true;
+    // }
 };

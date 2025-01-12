@@ -7,6 +7,12 @@
 
 using namespace std;
 
+struct MoneyBox
+{
+    int denomination;
+    int quantity;
+};
+
 class User
 {
 
@@ -35,7 +41,7 @@ public:
 
             cout << setw(7) << left << "ID" << setw(25) << "Name" << "Price" << endl;
             cout << endl;
-            for (auto item : items)
+            for (const auto &item : items)
             {
                 cout << setw(7) << item.item_id
                      << setw(25) << item.name
@@ -52,7 +58,8 @@ public:
 
         if (!isValidNumber(id))
         {
-            cout << "Please enter a string input!" << endl;
+            cout << "Invalid input! Please enter a valid numeric Item Code."
+                 << endl;
             return;
         }
 
@@ -66,8 +73,7 @@ public:
 
         cout << "\n***Your selected Item***\n";
         cout << setw(7) << left << "ID" << setw(25) << "Name" << "Price" << endl;
-        cout << endl;
-        cout << setw(7) << left << item.item_id << setw(25) << item.name << item.price << endl;
+        cout << "---------------------------------------------" << endl;
 
         if (item.quantity == 0)
         {
@@ -105,13 +111,62 @@ public:
             {
                 to_pay -= x;
                 cout << "You inserted " << x << " Baht.\n"
-                     << to_pay << " left to pay!" << endl;
+                     << to_pay << " Baht left to pay!" << endl;
             }
         }
 
-        cout << "You successfully purchased " << item.name << endl;
-        db.decrease_item_quantity(to_string(item.item_id));
-        cout << "Total Change: " << total_change << endl;
+        vector<MoneyBox> moneybox_collections = separate_money(item.price);
+        if (!isCollectionBoxFull(moneybox_collections))
+        {
+            insertMoneyToCollectionBox(moneybox_collections);
+            cout << "You successfully purchased " << item.name << endl;
+            db.decrease_item_quantity(to_string(item.item_id));
+            cout << "Total Change: " << total_change << endl;
+        }
+        else
+        {
+            cout << "Sorry! The money collection box is full!" << endl;
+            cout << "Here is your refund: " << item.price << " Baht" << endl;
+        }
+    }
+
+    vector<MoneyBox> separate_money(int price)
+    {
+        vector denominations = {100, 20, 10, 5, 1};
+        vector<MoneyBox> moneybox_collections;
+        for (int i : denominations)
+        {
+            if (price / i > 0)
+            {
+                MoneyBox moneybox;
+                moneybox.denomination = i;
+                moneybox.quantity = price / i;
+                price = price % i;
+                moneybox_collections.push_back(moneybox);
+            }
+        }
+        return moneybox_collections;
+    }
+
+    bool isCollectionBoxFull(const vector<MoneyBox> &money_collections)
+    {
+        for (auto box : money_collections)
+        {
+            int q = db.getQuantity(box.denomination, "collection_box");
+            if (q + box.quantity > 3)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    void insertMoneyToCollectionBox(vector<MoneyBox> money_collections)
+    {
+        for (auto box : money_collections)
+        {
+            db.insert_money(box.denomination, box.quantity);
+        }
     }
 
 private:
