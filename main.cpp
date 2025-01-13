@@ -1,12 +1,31 @@
 #include <iostream>
 #include <string>
+#include <fstream>
 #include "user.h"
 #include "admin.h"
+#include "db_setup.h"
 
 using namespace std;
 
+bool fileExists(const std::string &fileName)
+{
+    std::ifstream file(fileName);
+    return file.good();
+}
+
 int main()
 {
+    const std::string database_name = "my_database.db";
+
+    if (!fileExists(database_name))
+    {
+        std::cout << "Database not found. Setting up the database..." << std::endl;
+        setup_db(); // create tables and populate some data
+    }
+    // else
+    // {
+    //     std::cout << "Database already exists. Proceeding to main functionality..." << std::endl;
+    // }
 
     string choice;
 

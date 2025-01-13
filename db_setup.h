@@ -6,7 +6,7 @@
 
 void executeSQL(sqlite3 *db, const std::string &sql);
 
-int main()
+int setup_db()
 {
     sqlite3 *db;
     const char *database_name = "my_database.db";
@@ -23,7 +23,6 @@ int main()
         std::cout << "Opened database successfully: " << database_name << std::endl;
     }
 
-    // SQL command to create tables
     std::string createTableSQL = R"(
     CREATE TABLE IF NOT EXISTS stocks_67011653 (
         item_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -46,16 +45,14 @@ int main()
     )";
 
     std::string populate_items = R"(
-    INSERT INTO stocks_67011653 (name, price, quantity) VALUES ('Coke', 30, 20);
-    INSERT INTO stocks_67011653 (name, price, quantity) VALUES ('Pepsi', 23, 20);
-    INSERT INTO stocks_67011653 (name, price, quantity) VALUES ('Sprite', 12, 30);
-    INSERT INTO stocks_67011653 (name, price, quantity) VALUES ('Snickers', 30, 10);
-    INSERT INTO stocks_67011653 (name, price, quantity) VALUES ('KitKat', 14, 1);
-    INSERT INTO stocks_67011653 (name, price, quantity) VALUES ('Potato Chips', 10, 20);
-    INSERT INTO stocks_67011653 (name, price, quantity) VALUES ('Mars Bar', 13, 15);
-    INSERT INTO stocks_67011653 (name, price, quantity) VALUES ('Mineral Water (500ml)', 25, 40);
-    INSERT INTO stocks_67011653 (name, price, quantity) VALUES ('Chocolate Milk', 45, 20);
-    INSERT INTO stocks_67011653 (name, price, quantity) VALUES ('Oreo Cookies', 9, 10);
+    INSERT INTO stocks_67011653 (name, price, quantity) VALUES ('Coke', 30, 30);
+    INSERT INTO stocks_67011653 (name, price, quantity) VALUES ('Pepsi', 23, 30);
+    INSERT INTO stocks_67011653 (name, price, quantity) VALUES ('Snickers', 30, 30);
+    INSERT INTO stocks_67011653 (name, price, quantity) VALUES ('KitKat', 14, 30);
+    INSERT INTO stocks_67011653 (name, price, quantity) VALUES ('Potato Chips', 10, 30);
+    INSERT INTO stocks_67011653 (name, price, quantity) VALUES ('Mineral Water (500ml)', 25, 30);
+    INSERT INTO stocks_67011653 (name, price, quantity) VALUES ('Chocolate Milk', 45, 30);
+    INSERT INTO stocks_67011653 (name, price, quantity) VALUES ('Oreo Cookies', 9, 30);
 
     )";
     std::string populate_collection_box = R"(

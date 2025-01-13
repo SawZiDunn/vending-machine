@@ -24,7 +24,6 @@ public:
     {
         int rc;
 
-        // open database
         rc = sqlite3_open("my_database.db", &db);
 
         if (rc != SQLITE_OK)
@@ -38,7 +37,7 @@ public:
     {
         if (db)
         {
-            sqlite3_close(db); // Close the database when the object goes out of scope
+            sqlite3_close(db); // destructor to close database
             // std::cout << "Closed database successfully!" << std::endl;
         }
     }
@@ -111,10 +110,10 @@ public:
 
         if (sqlite3_step(stmt) == SQLITE_ROW)
         {
-            item.item_id = sqlite3_column_int(stmt, 0);                               // Assuming column 0 is "id"
-            item.name = reinterpret_cast<const char *>(sqlite3_column_text(stmt, 1)); // Column 1 is "name"
-            item.price = static_cast<float>(sqlite3_column_double(stmt, 2));          // Column 2 is "price"
-            item.quantity = sqlite3_column_int(stmt, 3);                              // Column 3 is "quantity"
+            item.item_id = sqlite3_column_int(stmt, 0);
+            item.name = reinterpret_cast<const char *>(sqlite3_column_text(stmt, 1));
+            item.price = static_cast<float>(sqlite3_column_double(stmt, 2));
+            item.quantity = sqlite3_column_int(stmt, 3);
         }
         else
         {

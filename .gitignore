@@ -1,1 +1,4 @@
 .vscode/
+sqlite3.h
+*.exe
+*.db
