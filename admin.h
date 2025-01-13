@@ -68,6 +68,9 @@ public:
         }
     }
 
+private:
+    DatabaseController db{};
+
     void add_stock()
     {
         string name;
@@ -156,7 +159,4 @@ public:
             cout << "---------------------------------------------" << endl;
         }
     }
-
-private:
-    DatabaseController db{};
 };
