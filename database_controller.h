@@ -1,5 +1,6 @@
 #pragma once
 
+#include "moneyInstance.h"
 #include <iostream>
 #include <string>
 #include <vector>
@@ -38,14 +39,15 @@ public:
         if (db)
         {
             sqlite3_close(db); // Close the database when the object goes out of scope
-            std::cout << "Closed database successfully!" << std::endl;
+            // std::cout << "Closed database successfully!" << std::endl;
         }
     }
 
-    void add_stock(string name, string price, string quantity)
+    // add a new item
+    void add_stock(string name, int price, int quantity)
     {
-        // Create SQL string with the values to be inserted
-        string values = "'" + name + "', " + price + ", " + quantity;
+        // Create SQL command string with the values to be inserted
+        string values = "'" + name + "', " + to_string(price) + ", " + to_string(quantity);
         string insertSQL = "INSERT INTO stocks_67011653 (name, price, quantity) VALUES (" + values + ");";
 
         char *errorMessage = nullptr;
@@ -56,10 +58,10 @@ public:
             std::cerr << "SQL error: " << errorMessage << std::endl;
             sqlite3_free(errorMessage);
         }
-        else
-        {
-            std::cout << "A new item added successfully!" << std::endl;
-        }
+        // else
+        // {
+        //     std::cout << "A new item added successfully!" << std::endl;
+        // }
     };
 
     vector<Item> get_all_items(const string &tableName)
@@ -119,11 +121,10 @@ public:
             item.item_id = -1;
         }
         sqlite3_finalize(stmt);
-        cout << item.item_id << item.name << endl;
         return item;
     }
 
-    void refill_stock(const string &id, string quantity)
+    void refill_stock(const string &id, int quantity)
     {
         string query = "SELECT quantity FROM stocks_67011653 WHERE item_id = " + id + ";";
 
@@ -140,7 +141,7 @@ public:
         int currentQuantity = 0;
         if (sqlite3_step(stmt) == SQLITE_ROW)
         {
-            currentQuantity = sqlite3_column_int(stmt, 0); // Get the 'quantity' column value
+            currentQuantity = sqlite3_column_int(stmt, 0); // get quantity column value
         }
         else
         {
@@ -150,7 +151,7 @@ public:
         }
 
         // Add the new quantity to the current quantity
-        int newQuantity = currentQuantity + stoi(quantity);
+        int newQuantity = currentQuantity + quantity;
 
         string updateQuery = "UPDATE stocks_67011653 SET quantity = " + to_string(newQuantity) + " WHERE item_id = " + id + ";";
 
@@ -162,40 +163,11 @@ public:
             cerr << "SQL error: " << errorMessage << endl;
             sqlite3_free(errorMessage);
         }
-        else
-        {
-            cout << "Stock refilled successfully!" << endl;
-        }
 
         sqlite3_finalize(stmt);
     }
 
-    // get quantity for a single denomination
-    int getQuantity(int denomination, const string &table_name)
-    {
-        string query = "SELECT quantity FROM " + table_name + " WHERE denomination = " + to_string(denomination) + ";";
-
-        sqlite3_stmt *stmt;
-        int rc = sqlite3_prepare_v2(db, query.c_str(), -1, &stmt, nullptr);
-
-        if (rc != SQLITE_OK)
-        {
-            cerr << "Failed to fetch data: " << sqlite3_errmsg(db) << endl;
-            return 0;
-        }
-
-        int quantity;
-        while (sqlite3_step(stmt) == SQLITE_ROW)
-        {
-            int q = sqlite3_column_int(stmt, 1); // Get the 'quantity' column value
-            quantity = q;
-        }
-
-        sqlite3_finalize(stmt);
-        return quantity;
-    }
-
-    // decrease item quantity by 1
+    // decrease item quantity by 1 according to item_id
     void decrease_item_quantity(const string &item_id)
     {
         string query = "SELECT quantity FROM stocks_67011653 WHERE item_id = " + item_id + ";";
@@ -239,7 +211,7 @@ public:
         sqlite3_finalize(stmt);
     }
 
-    // insert a single denomination (100, 20, etc) to collection_box
+    // insert a denomination quantity (100, 20, etc) to collection_box
     void insert_money(int denomination, int quantity)
     {
         string query = "SELECT quantity FROM collection_box WHERE denomination = " + to_string(denomination) + ";";
@@ -275,9 +247,72 @@ public:
         sqlite3_finalize(stmt);
     }
 
+    // decrease a denomination quantity (100, 20, etc) from change_box
+    void decrease_money(int denomination, int quantity)
+    {
+        string query = "SELECT quantity FROM change_box WHERE denomination = " + to_string(denomination) + ";";
+
+        sqlite3_stmt *stmt;
+        int rc = sqlite3_prepare_v2(db, query.c_str(), -1, &stmt, nullptr);
+
+        if (rc != SQLITE_OK)
+        {
+            cerr << "Failed to fetch data: " << sqlite3_errmsg(db) << endl;
+            return;
+        }
+
+        int currentQuantity = 0;
+        if (sqlite3_step(stmt) == SQLITE_ROW)
+        {
+            currentQuantity = sqlite3_column_int(stmt, 0);
+        }
+
+        int newQuantity = currentQuantity - quantity;
+
+        string updateQuery = "UPDATE change_box SET quantity = " + to_string(newQuantity) + " WHERE denomination = " + to_string(denomination) + ";";
+
+        char *errorMessage = nullptr;
+        rc = sqlite3_exec(db, updateQuery.c_str(), nullptr, nullptr, &errorMessage);
+
+        if (rc != SQLITE_OK)
+        {
+            cerr << "SQL error: " << errorMessage << endl;
+            sqlite3_free(errorMessage);
+        }
+
+        sqlite3_finalize(stmt);
+    }
+
+    // get all money instances from money tables
+    vector<MoneyInstance> get_money_instances(const string &table_name)
+    {
+        vector<MoneyInstance> money_instances;
+        string query = "SELECT denomination, quantity FROM " + table_name + ";";
+
+        sqlite3_stmt *stmt;
+        int rc = sqlite3_prepare_v2(db, query.c_str(), -1, &stmt, nullptr);
+
+        if (rc != SQLITE_OK)
+        {
+            cerr << "Failed to fetch data: " << sqlite3_errmsg(db) << endl;
+            return money_instances;
+        }
+
+        while (sqlite3_step(stmt) == SQLITE_ROW)
+        {
+            MoneyInstance MoneyInstance;
+            MoneyInstance.denomination = sqlite3_column_int(stmt, 0);
+            MoneyInstance.quantity = sqlite3_column_int(stmt, 1);
+            money_instances.push_back(MoneyInstance);
+        }
+
+        sqlite3_finalize(stmt);
+        return money_instances;
+    }
+
     void refill_change_box()
     {
-        string query = "UPDATE change_box SET quantity = 30;"; // SQL query to reset quantities to 0
+        string query = "UPDATE change_box SET quantity = 5;"; // SQL query to reset quantities to 0
         char *errorMessage = nullptr;
 
         int rc = sqlite3_exec(db, query.c_str(), nullptr, nullptr, &errorMessage);
@@ -287,13 +322,13 @@ public:
             cerr << "SQL error: " << errorMessage << endl;
             sqlite3_free(errorMessage);
         }
-        else
-        {
-            cout << "Change box is successfully refilled!" << endl;
-        }
+        // else
+        // {
+        //     cout << "Change box is successfully refilled!" << endl;
+        // }
     }
 
-    void collect_change_box()
+    void collect_collection_box()
     {
         string query = "UPDATE collection_box SET quantity = 0;"; // SQL query to reset quantities to 0
         char *errorMessage = nullptr;
@@ -305,10 +340,10 @@ public:
             cerr << "SQL error: " << errorMessage << endl;
             sqlite3_free(errorMessage);
         }
-        else
-        {
-            cout << "Collection box quantities have been reset!" << endl;
-        }
+        // else
+        // {
+        //     cout << "Collection box quantities have been reset!" << endl;
+        // }
     }
 
     // get total money from money_box
@@ -339,18 +374,4 @@ public:
 
 private:
     sqlite3 *db = nullptr;
-
-    // bool executeSQL(const string &query)
-    // {
-    //     char *errorMessage = nullptr;
-
-    //     int rc = sqlite3_exec(db, query.c_str(), nullptr, nullptr, &errorMessage);
-    //     if (rc != SQLITE_OK)
-    //     {
-    //         cerr << "SQL error: " << errorMessage << endl;
-    //         sqlite3_free(errorMessage);
-    //         return false;
-    //     }
-    //     return true;
-    // }
 };

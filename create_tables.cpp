@@ -23,7 +23,7 @@ int main()
         std::cout << "Opened database successfully: " << database_name << std::endl;
     }
 
-    // SQL command to create a table
+    // SQL command to create tables
     std::string createTableSQL = R"(
     CREATE TABLE IF NOT EXISTS stocks_67011653 (
         item_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -47,14 +47,14 @@ int main()
 
     std::string populate_items = R"(
     INSERT INTO stocks_67011653 (name, price, quantity) VALUES ('Coke', 30, 20);
-    INSERT INTO stocks_67011653 (name, price, quantity) VALUES ('Pepsi', 23, 15);
-    INSERT INTO stocks_67011653 (name, price, quantity) VALUES ('Sprite', 12, 10);
-    INSERT INTO stocks_67011653 (name, price, quantity) VALUES ('Snickers', 30, 25);
-    INSERT INTO stocks_67011653 (name, price, quantity) VALUES ('KitKat', 14, 30);
-    INSERT INTO stocks_67011653 (name, price, quantity) VALUES ('Lays (Chips)', 10, 20);
+    INSERT INTO stocks_67011653 (name, price, quantity) VALUES ('Pepsi', 23, 20);
+    INSERT INTO stocks_67011653 (name, price, quantity) VALUES ('Sprite', 12, 30);
+    INSERT INTO stocks_67011653 (name, price, quantity) VALUES ('Snickers', 30, 10);
+    INSERT INTO stocks_67011653 (name, price, quantity) VALUES ('KitKat', 14, 1);
+    INSERT INTO stocks_67011653 (name, price, quantity) VALUES ('Potato Chips', 10, 20);
     INSERT INTO stocks_67011653 (name, price, quantity) VALUES ('Mars Bar', 13, 15);
     INSERT INTO stocks_67011653 (name, price, quantity) VALUES ('Mineral Water (500ml)', 25, 40);
-    INSERT INTO stocks_67011653 (name, price, quantity) VALUES ('Twix', 45, 20);
+    INSERT INTO stocks_67011653 (name, price, quantity) VALUES ('Chocolate Milk', 45, 20);
     INSERT INTO stocks_67011653 (name, price, quantity) VALUES ('Oreo Cookies', 9, 10);
 
     )";
