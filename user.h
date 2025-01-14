@@ -69,7 +69,7 @@ private:
     void purchase_item()
     {
 
-        int id = getValidNumber("\nEnter Item Code:");
+        int id = getValidNumber("\nEnter Item Code: ");
 
         auto item = db.get_single_item(to_string(id));
 
@@ -147,6 +147,7 @@ private:
         {
             cout << "You received : " << endl;
         }
+
         for (MoneyInstance &box : refundableChange)
         {
             if (box.quantity > 0)
@@ -157,6 +158,7 @@ private:
 
         cout << "You successfully purchased " << item.name << "!" << endl;
         cout << "Total Change: " << fixed << setprecision(2) << total_change << " Baht" << endl;
+        cout << "*********************************************" << endl;
     }
 
     void print_item(const Item &item)
@@ -185,7 +187,7 @@ private:
 
         for (MoneyInstance &i : db_change_instances)
         {
-            while (i.quantity != 0 && i.denomination + temp_total_change <= total_change)
+            while (i.quantity > 0 && i.denomination + temp_total_change <= total_change)
             {
                 temp_total_change += i.denomination;
                 --i.quantity;
@@ -201,12 +203,7 @@ private:
 
         // empty vector if total change is not refundable
 
-        if (temp_total_change != total_change)
-        {
-            return {};
-        }
-
-        return refundable_change;
+        return {};
     }
 
     // sort money instances according to denomination in descending order
@@ -214,10 +211,11 @@ private:
     {
         for (int i = 0; i < money_instance_collection.size() - 1; ++i)
         {
-            for (int j = i; j < money_instance_collection.size() - i - 1; ++j)
+            for (int j = 0; j < money_instance_collection.size() - i - 1; ++j)
             {
                 if (money_instance_collection[j].denomination < money_instance_collection[j + 1].denomination)
                 {
+                    // Swap adjacent elements
                     MoneyInstance temp = money_instance_collection[j];
                     money_instance_collection[j] = money_instance_collection[j + 1];
                     money_instance_collection[j + 1] = temp;
@@ -235,6 +233,7 @@ private:
             if (i.denomination == amount)
             {
                 ++i.quantity;
+                return;
             }
         }
 
@@ -254,7 +253,7 @@ private:
 
             for (const auto &instance : money_instances)
             {
-                if (box.denomination == instance.denomination && box.quantity + instance.quantity > 3)
+                if (box.denomination == instance.denomination && box.quantity + instance.quantity > 30)
                 {
                     return true;
                 }

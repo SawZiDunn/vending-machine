@@ -65,9 +65,9 @@ int setup_db()
 
     std::string populate_change_box = R"(
     INSERT INTO change_box (denomination, quantity) VALUES (1, 30);
-    INSERT INTO change_box (denomination, quantity) VALUES (5, 30);
-    INSERT INTO change_box (denomination, quantity) VALUES (10, 30);
-    INSERT INTO change_box (denomination, quantity) VALUES (20, 30);
+    INSERT INTO change_box (denomination, quantity) VALUES (5, 1);
+    INSERT INTO change_box (denomination, quantity) VALUES (10, 2);
+    INSERT INTO change_box (denomination, quantity) VALUES (20, 1);
     INSERT INTO change_box (denomination, quantity) VALUES (100, 30);
     )";
 

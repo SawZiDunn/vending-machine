@@ -311,7 +311,7 @@ public:
 
     void refill_change_box()
     {
-        string query = "UPDATE change_box SET quantity = 5;"; // SQL query to reset quantities to 0
+        string query = "UPDATE change_box SET quantity = 30;"; // SQL query to reset quantities to 0
         char *errorMessage = nullptr;
 
         int rc = sqlite3_exec(db, query.c_str(), nullptr, nullptr, &errorMessage);
