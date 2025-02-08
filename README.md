@@ -47,7 +47,7 @@ A C++ program that simulates a vending machine with user and admin modes. This p
 1. Compile the program:
 
     ```bash
-    g++ main.cpp main.cpp -o vending_machine -lsqlite3
+    g++ main.cpp -o vending_machine -lsqlite3
     ```
 
 2. Run the program:

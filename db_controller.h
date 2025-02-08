@@ -43,7 +43,7 @@ public:
     }
 
     // add a new item
-    void add_stock(string name, int price, int quantity)
+    bool add_stock(string name, int price, int quantity)
     {
         // Create SQL command string with the values to be inserted
         string values = "'" + name + "', " + to_string(price) + ", " + to_string(quantity);
@@ -56,11 +56,14 @@ public:
         {
             std::cerr << "SQL error: " << errorMessage << std::endl;
             sqlite3_free(errorMessage);
+            return false;
         }
+
         // else
         // {
         //     std::cout << "A new item added successfully!" << std::endl;
         // }
+        return true;
     };
 
     vector<Item> get_all_items(const string &tableName)
@@ -123,7 +126,7 @@ public:
         return item;
     }
 
-    void refill_stock(const string &id, int quantity)
+    bool refill_stock(const string &id, int quantity)
     {
         string query = "SELECT quantity FROM stocks_67011653 WHERE item_id = " + id + ";";
 
@@ -133,7 +136,7 @@ public:
         if (rc != SQLITE_OK)
         {
             cerr << "Failed to fetch data: " << sqlite3_errmsg(db) << endl;
-            return;
+            return false;
         }
 
         // Execute the query and get the current quantity
@@ -146,7 +149,7 @@ public:
         {
             cout << "Product not found!" << endl;
             sqlite3_finalize(stmt);
-            return;
+            return false;
         }
 
         // Add the new quantity to the current quantity
@@ -161,9 +164,11 @@ public:
         {
             cerr << "SQL error: " << errorMessage << endl;
             sqlite3_free(errorMessage);
+            return false;
         }
 
         sqlite3_finalize(stmt);
+        return true;
     }
 
     // decrease item quantity by 1 according to item_id
